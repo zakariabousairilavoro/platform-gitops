@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fe-demo
+  template:
+    metadata:
+      labels:
+        app: fe-demo
+    spec:
+      containers:
+        - name: fe
+          image: nginx:alpine # verrà sostituita da Tekton
+          ports:
+            - containerPort: 80
