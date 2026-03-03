@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1
+kind: TaskRun
+metadata:
+  name: hello-run
+  namespace: ci
+spec:
+  taskRef:
+    name: hello
+

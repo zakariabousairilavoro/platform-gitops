@@ -1,0 +1,35 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: fe-demo-pipeline
+  namespace: ci
+spec:
+  params:
+    - name: GIT_REPO
+    - name: IMAGE
+  workspaces:
+    - name: shared-workspace
+  tasks:
+    - name: clone
+      taskRef:
+        name: git-clone
+      params:
+        - name: GIT_REPO
+          value: $(params.GIT_REPO)
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+
+    - name: build
+      runAfter:
+        - clone
+      taskRef:
+        name: buildah
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE)
+        - name: TAG
+          value: $(tasks.clone.results.commit)
+      workspaces:
+        - name: source
+          workspace: shared-workspace

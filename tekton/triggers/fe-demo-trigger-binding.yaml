@@ -1,0 +1,19 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: fe-demo-git-binding
+  namespace: ci
+spec:
+  params:
+    - name: GIT_REPO
+      value: $(body.repository.clone_url)
+    - name: REPO_NAME
+      value: $(body.repository.name)
+    - name: GIT_REVISION
+      value: $(body.ref)
+    - name: COMMIT
+      # For push events, 'after' contains the commit SHA; for other events adjust accordingly
+      value: $(body.after)
+    - name: IMAGE
+      # Construct a default image name using repository owner and name; adjust registry if needed
+      value: docker.io/$(body.repository.owner.login)/$(body.repository.name)

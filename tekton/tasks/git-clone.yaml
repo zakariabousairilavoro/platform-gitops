@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: ci
+spec:
+  results:
+    - name: commit
+      description: Commit short SHA
+  params:
+    - name: GIT_REPO
+      type: string
+    - name: GIT_REVISION
+      type: string
+      default: main
+  workspaces:
+    - name: output
+  steps:
+    - name: clone
+      image: alpine/git:latest
+      script: |
+        set -e
+
+        echo "Workspace path: $(workspaces.output.path)"
+        cd $(workspaces.output.path)
+
+        echo "Cloning repository"
+        git clone $(params.GIT_REPO) .
+
+        echo "Checking out revision $(params.GIT_REVISION)"
+        git checkout $(params.GIT_REVISION)
+
+        echo "Repository content:"
+        ls -la
+        echo
+        echo "Commit SHA (short):"
+        git rev-parse --short HEAD
+        echo -n "$(git rev-parse --short HEAD)" > $(results.commit.path)

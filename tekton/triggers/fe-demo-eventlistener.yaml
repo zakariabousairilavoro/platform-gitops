@@ -1,0 +1,19 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: fe-demo-listener
+  namespace: ci
+spec:
+  serviceAccountName: tekton-triggers-sa
+  triggers:
+    - name: git-trigger
+      bindings:
+        - ref: fe-demo-git-binding
+      template:
+        ref: fe-demo-pipelinetemplate
+      interceptors:
+        - github:
+            secret:
+              secretRef:
+                secretName: github-webhook-secret
+                secretKey: secret

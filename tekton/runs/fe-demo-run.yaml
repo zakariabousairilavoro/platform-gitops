@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: fe-demo-run-
+  namespace: ci
+spec:
+  serviceAccountName: tekton-build-sa
+  pipelineRef:
+    name: fe-demo-pipeline
+  params:
+    - name: GIT_REPO
+      value: https://github.com/zakariabousairilavoro/fe-demo-app.git
+    - name: IMAGE
+      value: docker.io/zakariabousairilavoto/fe-demo
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi

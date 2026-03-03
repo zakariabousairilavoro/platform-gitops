@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: buildah
+  namespace: ci
+spec:
+  params:
+    - name: IMAGE
+      type: string
+    - name: TAG
+      type: string
+      default: latest
+    - name: DOCKERFILE
+      type: string
+      default: docker/Dockerfile
+  workspaces:
+    - name: source
+  steps:
+    - name: build-and-push
+      image: quay.io/buildah/stable:v1.35
+      securityContext:
+        privileged: true
+      script: |
+        echo "Entering workspace"
+        cd $(workspaces.source.path)
+        ls -la
+
+        echo
+        echo "=== LS (root of workspace) ==="
+        ls -la
+
+        echo
+        echo "=== FIND (depth 3) ==="
+        find . -maxdepth 3 -type f -o -type d
+
+        echo
+
+        echo "PWD=$(pwd)"
+        ls -la
+
+        echo "Building image $(params.IMAGE):$(params.TAG)"
+        buildah bud \
+          -f $(params.DOCKERFILE) \
+          -t $(params.IMAGE):$(params.TAG) .
+
+        echo "Pushing image"
+        buildah push $(params.IMAGE):$(params.TAG)
+

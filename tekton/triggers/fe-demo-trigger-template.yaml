@@ -1,0 +1,36 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: fe-demo-pipelinetemplate
+  namespace: ci
+spec:
+  params:
+    - name: GIT_REPO
+    - name: REPO_NAME
+    - name: COMMIT
+    - name: GIT_REVISION
+    - name: IMAGE
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: fe-demo-triggered-
+        namespace: ci
+      spec:
+        serviceAccountName: tekton-build-sa
+        pipelineRef:
+          name: fe-demo-pipeline
+        params:
+          - name: GIT_REPO
+            value: $(params.GIT_REPO)
+          - name: IMAGE
+            # IMAGE is constructed from binding (registry/owner/name) and commit SHA tag
+            value: $(params.IMAGE):$(params.COMMIT)
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
